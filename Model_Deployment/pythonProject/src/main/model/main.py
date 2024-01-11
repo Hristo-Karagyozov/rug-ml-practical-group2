@@ -19,10 +19,10 @@ def compute_metrics(eval_pred):
 
 def load_tweets_and_labels():
     # read the tweets and emojis (labels) and put them in a pd df
-    with open("data/raw/test/us_test.text", "r", encoding="utf-8") as tweet_file:
+    with open("F:/University/Courses/ML_Practical/Assignments/rug-ml-practical-group2/Model_Deployment/pythonProject/data/raw/test/us_test.text", "r", encoding="utf-8") as tweet_file:
         tweets = tweet_file.readlines()
 
-    with open("data/raw/test/us_test.labels", "r", encoding="utf-8") as label_file:
+    with open("F:/University/Courses/ML_Practical/Assignments/rug-ml-practical-group2/Model_Deployment/pythonProject/data/raw/test/us_test.labels", "r", encoding="utf-8") as label_file:
         labels = label_file.readlines()
 
     df = pd.DataFrame({'tweet': tweets, 'label': labels})
