@@ -25,9 +25,30 @@ def load_tweets_and_labels():
     with open("F:/University/Courses/ML_Practical/Assignments/rug-ml-practical-group2/Model_Deployment/pythonProject/data/raw/test/us_test.labels", "r", encoding="utf-8") as label_file:
         labels = label_file.readlines()
 
-    df = pd.DataFrame({'tweet': tweets, 'label': labels})
+        # use zip to make instead of 2 dicts 1 list with 50k dicts
+        # what we have now: {labels: [1,3,4...2]}, {tweets: [nsdo, sdjf, sdjf, ... sdjf]}
+        # what we should have: {label:1, tweet:nsdo}
+        #                      {label:3, tweet:sdjf}
+        #                              .
+        #                              .
+        #                              .
+        #                              .
+        #                     {label:2, tweet:sdfj}
 
-    return df
+    # df = pd.DataFrame({'tweet': tweets, 'label': labels})
+    # print(df.head(10))
+
+    proper_df = []
+    for label, tweet in zip(labels, tweets):
+        combined_dict = {'label': label, 'tweet': tweet}
+        proper_df.append(combined_dict)
+    #
+    # for i, item in enumerate(proper_df):
+    #     print(item)
+    #     if i == 4:
+    #         break
+
+    return proper_df
 
 
 def main():
@@ -49,7 +70,7 @@ def main():
         compute_metrics=compute_metrics,
     )
 
-    trainer.train()
+    # trainer.train()
 
 
 if __name__ == "__main__":
