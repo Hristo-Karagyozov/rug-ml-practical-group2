@@ -13,6 +13,7 @@ def compute_metrics(eval_pred):
     metric = evaluate.load("accuracy")
 
     predictions = np.argmax(logits, axis=-1)
+    print(predictions)
 
     return metric.compute(predictions=predictions, references=labels)
 
@@ -27,25 +28,7 @@ def load_tweets_and_labels():
               "/us_test.labels", "r", encoding="utf-8") as label_file:
         labels = label_file.readlines()
 
-        # use zip to make instead of 2 dicts 1 list with 50k dicts
-        # what we have now: {labels: [1,3,4...2]}, {tweets: [nsdo, sdjf, sdjf, ... sdjf]}
-        # what we should have: {label:1, tweet:nsdo}
-        #                      {label:3, tweet:sdjf}
-        #                              .
-        #                              .
-        #                              .
-        #                              .
-        #                     {label:2, tweet:sdfj}
-
-    # df = pd.DataFrame({'tweet': tweets, 'label': labels})
-    # print(df.head(10))
-
     proper_df = [{'label': int(label), 'tweet': tweet} for label, tweet in zip(labels, tweets)]
-    #
-    # for i, item in enumerate(proper_df):
-    #     print(item)
-    #     if i == 4:
-    #         break
 
     return proper_df
 
@@ -54,7 +37,12 @@ def main():
     pipeline = preprocessing.Pipeline(load_tweets_and_labels())
     processed_data = pipeline.preprocess()
 
-    dataset = Dataset.from_pandas(processed_data)
+    # Convert the list of dictionaries to a Pandas DataFrame
+    df = pd.DataFrame(processed_data)
+
+    # Create the dataset from the Pandas DataFrame
+    dataset = Dataset.from_pandas(df)
+
 
     train_dataset, test_dataset = train_test_split(dataset, train_size=0.8, random_state=42)
 

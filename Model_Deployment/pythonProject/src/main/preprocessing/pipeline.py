@@ -2,8 +2,6 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
-import pandas as pd
-
 
 class Pipeline:
     def __init__(self, data_list):
@@ -14,10 +12,10 @@ class Pipeline:
         self.stop_words.update(self.custom_stop_words)
 
     def remove_stop_words(self, data):
-        for i in range(len(data)):
-            words = data[i]["tweet"].split()
+        for entry in data:
+            words = entry["tweet"].split()
             filtered = [word for word in words if word not in self.stop_words]
-            data[i]["tweet"] = ' '.join(filtered)
+            entry["tweet"] = ' '.join(filtered)
 
         return data
 
@@ -50,11 +48,6 @@ class Pipeline:
     def pad(self, data):
         for entry in data:
             current_tweet = str(entry["tweet"])
-
-            # I put a stock number here, but we should
-            # decide on what to put based on avg
-            # string length or something like that
-
             padded_tweet = current_tweet.ljust(128)
             entry["tweet"] = padded_tweet
 
@@ -66,7 +59,9 @@ class Pipeline:
         lemmatized_data = self.lemmatize(tokenized_data)
         data_no_punctuation = self.remove_punctuation(lemmatized_data)
         padded_data = self.pad(data_no_punctuation)
-        padded_data = pd.DataFrame(padded_data)
 
-        # return padded_data.to_csv("out.csv")
+        # Convert labels to integers
+        for entry in padded_data:
+            entry["label"] = int(entry["label"])
+
         return padded_data
