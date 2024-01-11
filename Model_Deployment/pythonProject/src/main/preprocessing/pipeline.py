@@ -2,76 +2,71 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
+import pandas as pd
 
 
 class Pipeline:
-    def __init__(self, df):
-        self.df = df
+    def __init__(self, data_list):
+        self.data_list = data_list
         self.punctuation = "[!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~]"
         self.stop_words = set(stopwords.words('english'))
         self.custom_stop_words = ["user", "tweet"]
         self.stop_words.update(self.custom_stop_words)
 
     def remove_stop_words(self, data):
-        d = data.copy()
-
-        for i in range(len(d)):
-            words = d.iloc[i]["tweet"].split()
+        for i in range(len(data)):
+            words = data[i]["tweet"].split()
             filtered = [word for word in words if word not in self.stop_words]
-            d.at[i, "tweet"] = ' '.join(filtered)
+            data[i]["tweet"] = ' '.join(filtered)
 
-        return d
+        return data
 
     def tokenize(self, data):
-        d = data.copy()
-        for idx, text in d["tweet"].items():
-            tokens = word_tokenize(text)
-            d.loc[idx, 'tweet'] = ' '.join(tokens)
+        for entry in data:
+            tokens = word_tokenize(entry["tweet"])
+            entry['tweet'] = ' '.join(tokens)
 
-        return d
+        return data
 
     def lemmatize(self, data):
-        d = data.copy()
         lemmatizer = WordNetLemmatizer()
 
-        for idx in range(len(d)):
-            words = nltk.word_tokenize(str(d.iloc[idx]["tweet"]))
+        for entry in data:
+            words = nltk.word_tokenize(str(entry["tweet"]))
             lemmatized_words = [lemmatizer.lemmatize(word) for word in words]
-            d.at[idx, "tweet"] = ' '.join(lemmatized_words)
+            entry["tweet"] = ' '.join(lemmatized_words)
 
-        return d
+        return data
 
     def remove_punctuation(self, data):
-        d = data.copy()
         transtab = str.maketrans(dict.fromkeys(self.punctuation, ''))
 
-        for idx in range(len(d)):
-            tweet = str(d.iloc[idx]["tweet"])
-            d.at[idx, "tweet"] = tweet.translate(transtab)
+        for entry in data:
+            tweet = str(entry["tweet"])
+            entry["tweet"] = tweet.translate(transtab)
 
-        return d
+        return data
 
     def pad(self, data):
-        d = data.copy()
-
-        for idx in range(len(d)):
-            current_tweet = str(d.iloc[idx]["tweet"])
+        for entry in data:
+            current_tweet = str(entry["tweet"])
 
             # I put a stock number here, but we should
             # decide on what to put based on avg
             # string length or something like that
 
             padded_tweet = current_tweet.ljust(128)
-            d.at[idx, "tweet"] = padded_tweet
+            entry["tweet"] = padded_tweet
 
-        return d
+        return data
 
     def preprocess(self):
-        tokenized_data = self.tokenize(self.df)
-        removed_stop_words = self.remove_stop_words(tokenized_data)
-        lemmatized_data = self.lemmatize(removed_stop_words)
+        removed_stop_words = self.remove_stop_words(self.data_list)
+        tokenized_data = self.tokenize(removed_stop_words)
+        lemmatized_data = self.lemmatize(tokenized_data)
         data_no_punctuation = self.remove_punctuation(lemmatized_data)
         padded_data = self.pad(data_no_punctuation)
+        padded_data = pd.DataFrame(padded_data)
 
         # return padded_data.to_csv("out.csv")
         return padded_data

@@ -5,7 +5,7 @@ from datasets import Dataset
 from sklearn.model_selection import train_test_split
 from transformers import RobertaForSequenceClassification, Trainer, TrainingArguments
 
-from src.main.preprocessing import pipeline as preprocessing
+from Model_Deployment.pythonProject.src.main.preprocessing import pipeline as preprocessing
 
 
 def compute_metrics(eval_pred):
@@ -19,10 +19,12 @@ def compute_metrics(eval_pred):
 
 def load_tweets_and_labels():
     # read the tweets and emojis (labels) and put them in a pd df
-    with open("F:/University/Courses/ML_Practical/Assignments/rug-ml-practical-group2/Model_Deployment/pythonProject/data/raw/test/us_test.text", "r", encoding="utf-8") as tweet_file:
+    with open("C:/Users/david/OneDrive/Desktop/University/Year 3/Machine Learning Practical/rug-ml-practical-group2/Model_Deployment/pythonProject/data/raw/test/us_test.text", "r", encoding="utf-8") as tweet_file:
         tweets = tweet_file.readlines()
 
-    with open("F:/University/Courses/ML_Practical/Assignments/rug-ml-practical-group2/Model_Deployment/pythonProject/data/raw/test/us_test.labels", "r", encoding="utf-8") as label_file:
+    with open("C:/Users/david/OneDrive/Desktop/University/Year 3/Machine Learning "
+              "Practical/rug-ml-practical-group2/Model_Deployment/pythonProject/data/raw/test"
+              "/us_test.labels", "r", encoding="utf-8") as label_file:
         labels = label_file.readlines()
 
         # use zip to make instead of 2 dicts 1 list with 50k dicts
@@ -38,10 +40,7 @@ def load_tweets_and_labels():
     # df = pd.DataFrame({'tweet': tweets, 'label': labels})
     # print(df.head(10))
 
-    proper_df = []
-    for label, tweet in zip(labels, tweets):
-        combined_dict = {'label': label, 'tweet': tweet}
-        proper_df.append(combined_dict)
+    proper_df = [{'label': int(label), 'tweet': tweet} for label, tweet in zip(labels, tweets)]
     #
     # for i, item in enumerate(proper_df):
     #     print(item)
@@ -70,7 +69,7 @@ def main():
         compute_metrics=compute_metrics,
     )
 
-    # trainer.train()
+    trainer.train()
 
 
 if __name__ == "__main__":
