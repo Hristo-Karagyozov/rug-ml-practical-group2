@@ -50,7 +50,7 @@ def main():
     df['input_ids'] = input_ids.tolist()
     df['attention_mask'] = attention_mask.tolist()
 
-    train_dataset, test_dataset = train_test_split(df, train_size=0.1, random_state=42)
+    train_dataset, test_dataset = train_test_split(df, train_size=0.7, random_state=42)
 
     # Convert the two datasets from pandas to dataset type again
     train_dataset = Dataset.from_pandas(train_dataset)
@@ -58,6 +58,17 @@ def main():
 
     model = RobertaForSequenceClassification.from_pretrained("roberta-base", num_labels=20)
     training_args = TrainingArguments(output_dir="test_trainer")
+
+    # freezing the first n layers depending on the best outcome
+    number_of_frozen_layers = 9
+
+    for name, param, in model.roberta.named_parameters():
+        layer_index = int(name.split(".")[2]) if 'encoder.layer' in name else None
+
+        if layer_index is not None and layer_index <= number_of_frozen_layers:
+            # small check to verify that we are actually freezing
+            # print(f"froze layer {layer_index}")
+            param.requires_grad = False
 
     trainer = Trainer(
         model=model,
