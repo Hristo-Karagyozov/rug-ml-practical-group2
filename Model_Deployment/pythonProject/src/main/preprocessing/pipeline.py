@@ -46,9 +46,12 @@ class Pipeline:
         return data
 
     def pad(self, data):
+        max_tweet_length = max(len(entry["tweet"]) for entry in data)
+        # print("max tweet length:", max_tweet_length)
+
         for entry in data:
             current_tweet = str(entry["tweet"])
-            padded_tweet = current_tweet.ljust(128)
+            padded_tweet = current_tweet.ljust(max_tweet_length)
             entry["tweet"] = padded_tweet
 
         return data
